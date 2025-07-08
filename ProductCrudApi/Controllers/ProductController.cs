@@ -20,6 +20,7 @@ namespace ProductCrudApi.Controllers
           
         }
 
+
         [HttpPost]
         public async Task<IActionResult> CreateProduct(ProductDto productDto)
         {
@@ -42,6 +43,7 @@ namespace ProductCrudApi.Controllers
             return Ok();
         }
 
+
         [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
@@ -50,6 +52,8 @@ namespace ProductCrudApi.Controllers
            
             return Ok(products);
         }
+
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
@@ -60,6 +64,7 @@ namespace ProductCrudApi.Controllers
 
             return Ok(product);
         }
+
 
 
         [HttpPut("{id}")]
@@ -77,6 +82,7 @@ namespace ProductCrudApi.Controllers
 
             return Ok(new { message = "Product updated successfully", data = existingProduct });
         }
+
 
 
         [HttpDelete("{id}")]
@@ -97,13 +103,13 @@ namespace ProductCrudApi.Controllers
 
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchProducts(string searchkey)
+        public async Task<IActionResult> SearchProducts(string searchKey)
         {
-            if(string.IsNullOrWhiteSpace(searchkey))
+            if(string.IsNullOrWhiteSpace(searchKey))
             {
                 return BadRequest("Searchkey must not be empty.");
             }
-            var result = await _unitOfWork.Products.SearchAsync(searchkey);
+            var result = await _unitOfWork.Products.SearchAsync(searchKey);
 
             if(!result.Any())
             {
@@ -111,6 +117,37 @@ namespace ProductCrudApi.Controllers
             }
             return Ok(result);
         }
+
+
+
+        [HttpGet("sort")]
+        public async Task<IActionResult> SortByName(string order)
+        {
+            var sortedProducts = await _unitOfWork.Products.SortByNameAsync(order);
+
+            if (!sortedProducts.Any())
+                return NotFound("No products found.");
+
+            return Ok(sortedProducts);
+        }
+
+
+
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedProducts(int pageNumber , int pageSize )
+        {
+            if (pageNumber <= 0 || pageSize <= 0)
+                return BadRequest("Page number and size must be greater than 0.");
+
+            var result = await _unitOfWork.Products.GetPagedAsync(pageNumber, pageSize);
+
+            if (!result.Items.Any())
+                return NotFound("No products found for this page.");
+
+            return Ok(result);
+        }
+
+
 
     }
 }
